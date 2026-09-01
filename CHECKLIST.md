@@ -21,9 +21,9 @@ Do not claim validation that was not actually run.
 
 # Current Status
 
-**Current phase:** P0 — Governance and execution contract
+**Current phase:** P2 — Universal property metadata and bounded controls
 
-**Current next action:** Begin P1 shared primitives and diagnostics after reviewing the newly committed phased build order.
+**Current next action:** Begin P2.1–P2.4 by defining authoritative tunable-property metadata on top of `RangeSpec`, then add focused validation before building the inspector control.
 
 ---
 
@@ -40,18 +40,18 @@ Do not claim validation that was not actually run.
 - [x] P0.7 Record TODO/placeholder philosophy.
 - [x] P0.8 Record magic-number/constants documentation policy.
 - [x] P0.9 Record universal numeric bounds/slider contract.
-- [ ] P0.10 Review repository conventions during first implementation turn and adjust only where real code exposes a need.
+- [x] P0.10 Review repository conventions during first implementation turn and adjust only where real code exposes a need.
 
 ## P1 — Shared primitives and diagnostics
 
-- [ ] P1.1 Define stable ID representation/convention.
-- [ ] P1.2 Define bounds/range metadata primitives.
-- [ ] P1.3 Define world/grid position conventions.
-- [ ] P1.4 Define direction representation.
-- [ ] P1.5 Define asset/content reference primitive.
-- [ ] P1.6 Define validation result and diagnostic structures.
-- [ ] P1.7 Add focused tests/validation.
-- [ ] P1.8 Review module boundaries before phase close.
+- [x] P1.1 Define stable ID representation/convention.
+- [x] P1.2 Define bounds/range metadata primitives.
+- [x] P1.3 Define world/grid position conventions.
+- [x] P1.4 Define direction representation.
+- [x] P1.5 Define asset/content reference primitive.
+- [x] P1.6 Define validation result and diagnostic structures.
+- [x] P1.7 Add focused tests/validation.
+- [x] P1.8 Review module boundaries before phase close.
 
 ## P2 — Universal property metadata and bounded controls
 
@@ -292,3 +292,32 @@ Do not claim validation that was not actually run.
 
 **Next logical task:**
 - Review/approve phased order, then begin P1 shared primitives and diagnostics.
+
+## 2026-09-01 — P1 shared primitives and diagnostics
+
+**Phase/task IDs:** P0.10, P1.1–P1.8
+
+**Changed:**
+- Added stable ID convention and validator.
+- Added reusable hard/recommended range primitive.
+- Established Vector2 world-pixel and Vector2i grid-cell conventions with data-supplied cell size.
+- Added eight-direction representation with normalized diagonal vectors.
+- Added stable content/asset reference primitive.
+- Added structured Diagnostic and ValidationResult primitives.
+- Added focused headless P1 tests and a reusable Godot core-validation workflow.
+
+**Validation actually run:**
+- GitHub Actions / Godot 4.7.2 official standard Linux x86_64.
+- `godot --headless --editor --import --quit --path .` — PASS.
+- `godot --headless --check-only --quit --path .` — PASS.
+- `tests/core/test_shared_primitives.gd` — initial run found one StableId empty-segment bug; fixed.
+- Focused rerun after fix — PASS.
+
+**Result:**
+- P1 complete. Shared primitives remain small and dependency-light; native Godot spatial types are retained rather than wrapped unnecessarily.
+
+**New TODOs:**
+- None required for P1. P2 will extend RangeSpec into authoritative tunable-property metadata and UI-facing validation.
+
+**Next logical task:**
+- Begin P2.1–P2.4 property metadata and validation before building the bounded numeric inspector control.
