@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  shared-primitives:
+  core-validation:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -34,3 +34,6 @@ jobs:
 
       - name: Test shared primitives
         run: ${{ runner.temp }}/o-go-tools/bin/godot --headless --path . --script res://tests/core/test_shared_primitives.gd
+
+      - name: Test tunable property metadata
+        run: ${{ runner.temp }}/o-go-tools/bin/godot --headless --path . --script res://tests/core/test_tunable_property_spec.gd
