@@ -9,6 +9,12 @@ extends RefCounted
 ## `npc.village.blacksmith`. Each segment must be a valid GDScript-style
 ## identifier, must not begin with `_`, and must remain lowercase.
 
+# Stable IDs require at least one namespace segment plus one local-name segment.
+# This is a structural invariant, not tuning: there is no supported lower range
+# below 2 because single-segment IDs lose namespace ownership. More segments are
+# allowed without a fixed upper bound as long as every segment remains valid.
+const MIN_SEGMENT_COUNT := 2
+
 var value: StringName = &""
 
 
@@ -30,7 +36,7 @@ static func is_valid_text(text: String) -> bool:
 
     # Keep empty fields so malformed IDs such as `map..village` are rejected.
     var segments := text.split(".", true)
-    if segments.size() < 2:
+    if segments.size() < MIN_SEGMENT_COUNT:
         return false
 
     for segment in segments:
