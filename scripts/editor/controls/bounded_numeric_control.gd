@@ -16,8 +16,17 @@ signal value_changed(value: float)
 
 # UI display precision only. Twelve decimal places preserve deliberately tiny
 # legal bounds (for example 0.000001) while avoiding unreadable float noise.
+# Expected useful presentation range: roughly 6–15 decimal places. Below that
+# can hide intentionally tiny legal values; above that exposes float artifacts.
 # Runtime values are never rounded to this precision.
 const DISPLAY_DECIMAL_PRECISION := 12
+
+# Minimum width of the bracketed free-entry field. 120 px keeps common signed
+# and decimal values readable without dominating an inspector row.
+# Expected useful UI range: roughly 80–240 px. Smaller widths truncate common
+# values; larger widths consume horizontal space without improving semantics.
+# This is presentation-only and must not become project/game tuning data.
+const CURRENT_VALUE_MIN_WIDTH := 120.0
 
 var spec: TunablePropertySpec
 var current_value: float = 0.0
@@ -106,7 +115,7 @@ func _ensure_ui() -> void:
 
     _value_edit = LineEdit.new()
     _value_edit.name = "CurrentValue"
-    _value_edit.custom_minimum_size.x = 120.0
+    _value_edit.custom_minimum_size.x = CURRENT_VALUE_MIN_WIDTH
     _value_edit.text_submitted.connect(_on_value_text_submitted)
     _value_edit.focus_exited.connect(_on_value_focus_exited)
     row.add_child(_value_edit)
