@@ -1,0 +1,43 @@
+class_name StableId
+extends RefCounted
+
+## Human-readable stable identifier for project content.
+##
+## External data stores IDs as plain strings. This helper centralizes the
+## convention without forcing serialized data to depend on a custom object.
+## IDs are lowercase dot-separated namespaces such as `map.village` or
+## `npc.village.blacksmith`. Each segment must be a valid GDScript-style
+## identifier, must not begin with `_`, and must remain lowercase.
+
+var value: StringName = &""
+
+
+func _init(text: String = "") -> void:
+    value = StringName(text)
+
+
+func is_valid() -> bool:
+    return is_valid_text(String(value))
+
+
+func as_string() -> String:
+    return String(value)
+
+
+static func is_valid_text(text: String) -> bool:
+    if text.is_empty() or text != text.to_lower():
+        return false
+
+    var segments := text.split(".", false)
+    if segments.size() < 2:
+        return false
+
+    for segment in segments:
+        if segment.is_empty():
+            return false
+        if segment.begins_with("_"):
+            return false
+        if not segment.is_valid_identifier():
+            return false
+
+    return true
