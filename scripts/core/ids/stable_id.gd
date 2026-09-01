@@ -28,7 +28,8 @@ static func is_valid_text(text: String) -> bool:
     if text.is_empty() or text != text.to_lower():
         return false
 
-    var segments := text.split(".", false)
+    # Keep empty fields so malformed IDs such as `map..village` are rejected.
+    var segments := text.split(".", true)
     if segments.size() < 2:
         return false
 
