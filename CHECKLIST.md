@@ -23,7 +23,7 @@ Do not claim validation that was not actually run.
 
 **Current phase:** P2 — Universal property metadata and bounded controls
 
-**Current next action:** Begin P2.1–P2.4 by defining authoritative tunable-property metadata on top of `RangeSpec`, then add focused validation before building the inspector control.
+**Current next action:** Complete the queued Godot behavioral validation for P2.7, then build P2.5–P2.6 reusable numeric inspector control and recommended-range warning presentation.
 
 ---
 
@@ -55,13 +55,13 @@ Do not claim validation that was not actually run.
 
 ## P2 — Universal property metadata and bounded controls
 
-- [ ] P2.1 Define authoritative tunable-property metadata.
-- [ ] P2.2 Support recommended vs. hard bounds.
-- [ ] P2.3 Support defaults, units, steps, rationale, consequences.
-- [ ] P2.4 Implement property validation.
+- [x] P2.1 Define authoritative tunable-property metadata.
+- [x] P2.2 Support recommended vs. hard bounds.
+- [x] P2.3 Support defaults, units, steps, rationale, consequences.
+- [x] P2.4 Implement property validation.
 - [ ] P2.5 Build reusable numeric inspector control.
 - [ ] P2.6 Implement legal-outside-recommended warnings.
-- [ ] P2.7 Test bound/extreme cases.
+- [ ] P2.7 Test bound/extreme cases. *(Focused test committed; latest workflow run is queued for a GitHub runner.)*
 - [ ] P2.8 Review editor/runtime metadata parity.
 
 ## P3 — Constants and tuning infrastructure
@@ -321,3 +321,31 @@ Do not claim validation that was not actually run.
 
 **Next logical task:**
 - Begin P2.1–P2.4 property metadata and validation before building the bounded numeric inspector control.
+
+## 2026-09-01 — P2 tunable-property metadata foundation
+
+**Phase/task IDs:** P2.1–P2.4, P2.7 (test authored; run pending)
+
+**Changed:**
+- Added `TunablePropertySpec` as the single authoritative numeric-property metadata resource.
+- Added stable property IDs, display names, descriptions, defaults, units, editor step, rationale, consequences, and `RangeSpec` integration.
+- Added definition validation for malformed IDs, missing display names/ranges, invalid bound ordering, out-of-range defaults, and negative editor steps.
+- Added runtime value validation that warns outside recommended bounds but errors only outside legal hard bounds.
+- Kept editor step as UI increment metadata rather than a restriction on manually entered legal values.
+- Added focused metadata/extreme-value tests and extended Core Validation to run them after P1 tests.
+
+**Validation actually run:**
+- On the commit containing the metadata/test files, the existing Godot 4.7.2 workflow completed project import, project parse, and P1 regression tests successfully.
+- The updated workflow that actually executes `tests/core/test_tunable_property_spec.gd` is currently queued by GitHub and has not run yet.
+
+**Result:**
+- P2.1–P2.4 implementation complete.
+- P2.7 remains open until the focused behavioral test executes successfully.
+- P2.5–P2.6 inspector UI work intentionally not started.
+
+**New TODOs:**
+- Complete P2.7 when the queued workflow receives a runner.
+- Then build P2.5–P2.6 from the same authoritative metadata without duplicating bounds or validation rules in UI code.
+
+**Next logical task:**
+- Verify the queued P2 test run, then implement the reusable numeric inspector control and warning presentation.
