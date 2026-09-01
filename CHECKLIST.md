@@ -21,9 +21,9 @@ Do not claim validation that was not actually run.
 
 # Current Status
 
-**Current phase:** P2 — Universal property metadata and bounded controls
+**Current phase:** P3 — Constants and tuning infrastructure
 
-**Current next action:** Complete the queued Godot behavioral validation for P2.7, then build P2.5–P2.6 reusable numeric inspector control and recommended-range warning presentation.
+**Current next action:** Begin P3.1–P3.4 by formalizing configuration-vs-constant conventions and lightweight review guidance before the project model starts consuming tunable settings.
 
 ---
 
@@ -59,10 +59,10 @@ Do not claim validation that was not actually run.
 - [x] P2.2 Support recommended vs. hard bounds.
 - [x] P2.3 Support defaults, units, steps, rationale, consequences.
 - [x] P2.4 Implement property validation.
-- [ ] P2.5 Build reusable numeric inspector control.
-- [ ] P2.6 Implement legal-outside-recommended warnings.
-- [ ] P2.7 Test bound/extreme cases. *(Focused test committed; latest workflow run is queued for a GitHub runner.)*
-- [ ] P2.8 Review editor/runtime metadata parity.
+- [x] P2.5 Build reusable numeric inspector control.
+- [x] P2.6 Implement legal-outside-recommended warnings.
+- [x] P2.7 Test bound/extreme cases.
+- [x] P2.8 Review editor/runtime metadata parity.
 
 ## P3 — Constants and tuning infrastructure
 
@@ -336,12 +336,12 @@ Do not claim validation that was not actually run.
 
 **Validation actually run:**
 - On the commit containing the metadata/test files, the existing Godot 4.7.2 workflow completed project import, project parse, and P1 regression tests successfully.
-- The updated workflow that actually executes `tests/core/test_tunable_property_spec.gd` is currently queued by GitHub and has not run yet.
+- The updated workflow that actually executes `tests/core/test_tunable_property_spec.gd` was queued at the end of that turn.
 
 **Result:**
 - P2.1–P2.4 implementation complete.
-- P2.7 remains open until the focused behavioral test executes successfully.
-- P2.5–P2.6 inspector UI work intentionally not started.
+- P2.7 remained open at the end of that turn pending focused behavioral execution.
+- P2.5–P2.6 inspector UI work intentionally had not started yet.
 
 **New TODOs:**
 - Complete P2.7 when the queued workflow receives a runner.
@@ -349,3 +349,38 @@ Do not claim validation that was not actually run.
 
 **Next logical task:**
 - Verify the queued P2 test run, then implement the reusable numeric inspector control and warning presentation.
+
+## 2026-09-01 — P2 bounded numeric control
+
+**Phase/task IDs:** P2.5–P2.8
+
+**Changed:**
+- Added reusable `BoundedNumericControl` with the universal `LOW — THUMB — HIGH - [CURRENT]` layout.
+- Bound slider hard limits and step directly to `TunablePropertySpec`/`RangeSpec` metadata.
+- Used free numeric text entry for `[CURRENT]` so manual legal values are not quantized to slider step increments.
+- Added warning-only presentation for values outside the recommended range, including consequence metadata.
+- Added invalid-text handling that preserves the prior value.
+- Added hard-bound clamping for breaking values.
+- Documented the 12-decimal UI display precision constant and kept it display-only.
+- Added focused headless editor-control tests and CI coverage.
+
+**Validation actually run:**
+- Earlier queued `tests/core/test_tunable_property_spec.gd` execution — PASS.
+- Godot 4.7.2 project import — PASS.
+- Godot project parse/check-only — PASS.
+- P1 shared primitive regression suite — PASS.
+- P2 metadata regression suite — PASS.
+- Initial bounded-control test exposed a test lifecycle error; deferred assertions until the control reached `_ready()`.
+- Second bounded-control run exposed two production issues: slider configuration could overwrite the caller-provided value, and approximate-equality display logic collapsed `0.000001` to `0`; both fixed.
+- Final `tests/editor/test_bounded_numeric_control.gd` run — PASS.
+
+**Result:**
+- P2 complete.
+- Data/runtime/editor ownership remains one-way: `BoundedNumericControl` consumes `TunablePropertySpec`; metadata and core primitives do not depend on editor code.
+- Legal experimental values remain editable even when outside recommended bounds.
+
+**New TODOs:**
+- None required for P2. Later inspector/editor phases can reuse `BoundedNumericControl` rather than reinventing numeric bounds behavior.
+
+**Next logical task:**
+- Begin P3 constants and tuning infrastructure before the project model begins adding real project-level configuration.
