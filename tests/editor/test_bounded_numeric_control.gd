@@ -1,21 +1,25 @@
 extends SceneTree
 
 var _failures := 0
+var _control: BoundedNumericControl
 
 
 func _initialize() -> void:
     var spec := _make_run_speed_spec()
-    var control := BoundedNumericControl.new()
-    control.configure(spec, 300.0)
-    root.add_child(control)
+    _control = BoundedNumericControl.new()
+    _control.configure(spec, 300.0)
+    root.add_child(_control)
+    call_deferred("_run_tests")
 
-    _test_layout(control)
-    _test_recommended_and_warning_states(control)
-    _test_manual_unquantized_entry(control)
-    _test_hard_bound_clamping(control)
-    _test_invalid_text_preserves_value(control)
 
-    control.queue_free()
+func _run_tests() -> void:
+    _test_layout(_control)
+    _test_recommended_and_warning_states(_control)
+    _test_manual_unquantized_entry(_control)
+    _test_hard_bound_clamping(_control)
+    _test_invalid_text_preserves_value(_control)
+
+    _control.queue_free()
 
     if _failures == 0:
         print("PASS: bounded numeric control")
