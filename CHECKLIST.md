@@ -21,9 +21,9 @@ Do not claim validation that was not actually run.
 
 # Current Status
 
-**Current phase:** P3 — Constants and tuning infrastructure
+**Current phase:** P4 — Project model
 
-**Current next action:** Begin P3.1–P3.4 by formalizing configuration-vs-constant conventions and lightweight review guidance before the project model starts consuming tunable settings.
+**Current next action:** Begin P4.1–P4.5 by defining a versioned project manifest and focused loader/validation path, including 16/32/64 tile sizes and named starting map/spawn data, before wiring any downstream map runtime.
 
 ---
 
@@ -66,10 +66,10 @@ Do not claim validation that was not actually run.
 
 ## P3 — Constants and tuning infrastructure
 
-- [ ] P3.1 Establish project configuration vs. runtime constant conventions.
-- [ ] P3.2 Establish centralized tuning locations where appropriate.
-- [ ] P3.3 Apply documentation rule to non-obvious constants.
-- [ ] P3.4 Add review guidance for unexplained critical literals.
+- [x] P3.1 Establish project configuration vs. runtime constant conventions.
+- [x] P3.2 Establish centralized tuning locations where appropriate.
+- [x] P3.3 Apply documentation rule to non-obvious constants.
+- [x] P3.4 Add review guidance for unexplained critical literals.
 
 ## P4 — Project model
 
@@ -384,3 +384,32 @@ Do not claim validation that was not actually run.
 
 **Next logical task:**
 - Begin P3 constants and tuning infrastructure before the project model begins adding real project-level configuration.
+
+## 2026-09-01 — P3 tuning and constants policy
+
+**Phase/task IDs:** P3.1–P3.4
+
+**Changed:**
+- Added `docs/TUNING_AND_CONSTANTS.md` defining ownership for user/designer tunables, project configuration, content-local configuration, engine invariants, presentation constants, and derived values.
+- Explicitly rejected catch-all global tuning/constants managers; values remain with their owning subsystem unless ownership is genuinely shared.
+- Defined the documentation contract for non-obvious constants: what, why code vs. data, expected range/invariant, consequence of change, and derivation/source when applicable.
+- Added the policy to `AGENTS.md` so future coding agents receive it as repository guidance.
+- Audited the current small production surface: replaced the numeric editor's unexplained `120px` literal with a documented local UI constant, documented expected display-precision bounds, made the stable-ID two-segment rule a named structural invariant, and clarified the diagonal component as a fixed mathematical invariant with no tuning range.
+- Deliberately did not add a naive numeric-literal linter or global tuning registry; both would add false positives or premature centralization at the current project size.
+
+**Validation actually run:**
+- Godot 4.7.2 project import — PASS.
+- Godot project parse/check-only — PASS.
+- P1 shared primitive regression suite — PASS.
+- P2 tunable-property metadata suite — PASS.
+- P2 bounded numeric control suite — PASS.
+
+**Result:**
+- P3 complete.
+- The project now has an explicit rule for deciding whether a value belongs in project/content data, a focused local constant, or a derived value before P4 introduces real project configuration.
+
+**New TODOs:**
+- Consider AST-aware literal review tooling only if repository size later makes manual/agent review insufficient; this is not an MVP requirement.
+
+**Next logical task:**
+- Begin P4 project manifest schema, loader, tile-size configuration, starting map/spawn references, and validation diagnostics.
