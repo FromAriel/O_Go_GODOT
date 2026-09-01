@@ -11,6 +11,15 @@ This repository is a clean Godot 4.7.2 game shell. Keep changes tightly scoped t
 - Use 4 spaces for GDScript indentation.
 - Prefer text-based `.tscn` and `.tres` resources when practical so changes remain reviewable in Git.
 
+## Architecture and tuning
+
+- Follow `docs/TUNING_AND_CONSTANTS.md` when adding configurable values, constants, or non-obvious literals.
+- User/designer-editable values belong in project/content data; numeric metadata belongs in `TunablePropertySpec` rather than duplicated in UI code.
+- Do not create catch-all global tuning/constants managers. Keep values with the subsystem or content object that owns them unless several systems genuinely share the same semantic setting.
+- Non-obvious constants must explain what they control, why they are code rather than data, their expected range or invariant, and the consequence of changing them.
+- Derived values should be derived from authoritative data instead of stored as a second authority.
+- TODOs and future placeholders are guidance, not architectural commitments; remove or revise them when later evidence points elsewhere.
+
 ## Repository hygiene
 
 - Do not commit `.godot/`, imported caches, editor state, exports, build output, logs, or temporary files.
