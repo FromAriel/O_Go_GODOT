@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://fromariel.github.io/CODEXVault_GODOT/tools/miniclone/sitemap.xml
