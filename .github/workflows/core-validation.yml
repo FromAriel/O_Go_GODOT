@@ -1,0 +1,36 @@
+name: Core Validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  shared-primitives:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Bootstrap Godot 4.7.2
+        env:
+          PROJECT_DIR: ${{ github.workspace }}
+          TOOL_ROOT: ${{ runner.temp }}/o-go-tools
+          CACHE_ROOT: ${{ runner.temp }}/o-go-cache
+          ALLOW_NETWORK_DOWNLOAD: "1"
+          WARM_IMPORT_CACHE: "0"
+        run: bash .chatgpt/setup.sh
+
+      - name: Import project
+        run: ${{ runner.temp }}/o-go-tools/bin/godot --headless --editor --import --quit --path .
+
+      - name: Parse project
+        run: ${{ runner.temp }}/o-go-tools/bin/godot --headless --check-only --quit --path .
+
+      - name: Test shared primitives
+        run: ${{ runner.temp }}/o-go-tools/bin/godot --headless --path . --script res://tests/core/test_shared_primitives.gd
