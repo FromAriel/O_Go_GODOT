@@ -1,128 +1,43 @@
-\###############################################################################
+# AGENTS.md
 
-# 🧠  Codex Agent Workspace – Tooling Contract & Guide
+## Scope
 
-# Godot 4.7.2 · Headless · CI‑safe · **.NET 8 SDK + Godot‑mono included**
+This repository is a clean Godot 4.7.2 game shell. Keep changes tightly scoped to the user's request. Do not perform unrelated refactors, archaeology, cleanup, or speculative work.
 
-\###############################################################################
+## Engine and language
 
-\[!IMPORTANT]
-Indentation → **always 4 spaces** in `.gd`, `.gdshader`, `.cs`. Never tabs.
-`gdlint` expects `class_name` **before** `extends`.
+- Target Godot 4.7.2 unless the user explicitly changes the project version.
+- Prefer GDScript for new gameplay code unless the user asks for C#.
+- Use 4 spaces for GDScript indentation.
+- Prefer text-based `.tscn` and `.tres` resources when practical so changes remain reviewable in Git.
 
-──────────────────── SECTION: FIRST‑TIME SETUP ────────────────────
+## Repository hygiene
 
-1. **Use the built‑in Godot CLI**  (`/usr/local/bin/godot` in this image).
-   If you must override, export `GODOT=/full/path/to/godot`.
+- Do not commit `.godot/`, imported caches, editor state, exports, build output, logs, or temporary files.
+- Source assets such as images, audio, fonts, and models are allowed when they are part of the game. Do not apply a blanket no-binaries rule to game assets.
+- Do not modify `.chatgpt/` or `.codex/` tooling unless the task is specifically about the development environment.
+- Preserve LF line endings for repository text files.
 
-   **Selecting Godot version (CODEX Cloud):** re-run `.codex/setup.sh` with env vars:
-   - `GODOT_TAG=4.7.2-stable` (recommended)
-   - `GODOT_TAG=latest-stable` (tracks latest stable via GitHub API)
-   - `GODOT_ARCH=arm64` (or `x86_64`, `x86_32`, `arm32`)
-2. **Import pass** – warm caches & create `global_script_class_cache.cfg`:
+## Validation
 
-   ```bash
-   godot --headless --editor --import --quit --path .
-   ```
-3. **Parse all GDScript**:
-
-   ```bash
-   godot --headless --check-only --quit --path .   # path MUST be repo root
-   ```
-4. **Build C#/Mono** (auto‑skips if no `*.sln`):
-
-   ```bash
-   dotnet build > /tmp/dotnet_build.log
-   tail -n 20 /tmp/dotnet_build.log
-   ```
-
-   • **Exit 0** ⇒ project is clean.
-   • **Non‑zero** ⇒ inspect error lines and fix.
-
-Repeat steps 2‑4 after any edit until all return 0.
-
-──────────────────── SECTION: PATCH HYGIENE & FORMAT ────────────────────
+After changing GDScript, scenes, resources, or project configuration, run the relevant Godot checks when the environment supports them:
 
 ```bash
-# Auto‑format changed .gd
-.codex/fix_indent.sh $(git diff --name-only --cached -- '*.gd')
-# Optional extra lint
-gdlint $(git diff --name-only --cached -- '*.gd') || true
-# C# style check
-dotnet format --verify-no-changes || {
-  echo 'C# code‑style violations detected.'; exit 1; }
+godot --headless --editor --import --quit --path .
+godot --headless --check-only --quit --path .
 ```
 
-No tabs, no syntax errors, no style violations before commit.
+Use `.chatgpt/setup.sh` for the lightweight ChatGPT sandbox environment and `.codex/setup.sh` for the fuller Linux/Codex environment.
 
-──────────────────── SECTION: VALIDATION LOOP (CI) ────────────────────
+Run focused tests for the system changed. Do not spend time running unrelated test suites unless a dependency or failure makes them necessary.
 
-```bash
-godot --headless --editor --import --quit --path .   # refresh cache
-godot --headless --check-only --quit --path .        # parse .gd
-dotnet build > /tmp/dotnet_build.log                 # compile C# (auto‑skip)
-```
+## Delivery
 
-Optional tests:
+When work is complete, report:
 
-```bash
-godot --headless -s res://tests/          # GDScript tests
- dotnet test                              # C#
- cargo test | go test ./... | bun test    # others if present
-```
+1. what changed,
+2. which files changed,
+3. what verification actually ran,
+4. any remaining failure or uncertainty.
 
-──────────────────── SECTION: QUICK CHECKLIST ────────────────────
-
-```
-apply_patch
-├─ gdformat  --use-spaces=4 <changed.gd>
-├─ gdlint    <changed.gd> (non‑blocking)
-├─ godot --headless --editor --import  --quit --path .
-├─ godot --headless --check-only       --quit --path .
-├─ dotnet build > /tmp/dotnet_build.log
-└─ tail -n 20 /tmp/dotnet_build.log  →  ✔ commit / ✘ fix
-```
-
-──────────────────── SECTION: WHY THIS MATTERS ────────────────────
-
-* `--import` is the **only** way to build Godot’s script‑class cache.
-* CI **skips** the import when no `main_scene` is set, so fresh repos won’t fail.
-* `--check-only` finds GDScript errors; `dotnet build` ensures C# compiles.
-  Together they guarantee the project builds headless on any clean machine.
-
-> **TL;DR** Run the three headless commands. Exit 0 ⇒ good. Else, fix & rerun.
-
-──────────────────── ADDENDUM: BUILD‑PLAN RULE SET ────────────────────
-
-1. **Foundation first** – scaffolding (data models, interfaces, utils) is built before high‑level features. CI fails fast if missing.
-2. **Design principles** – data‑driven, modular, extensible, compartmentalised. Follow each language’s canonical formatter (PEP 8, rustfmt, go fmt, gdformat, etc.).
-3. **Indentation** – spaces‑only except where a language **requires** tabs (e.g. `Makefile`). Keep tabs localised to that file type.
-4. **Header‑comment block** – for files that support comments, prepend:
-
-   ```
-   ###############################################################
-   # <file path>
-   # Key funcs/classes: • Foo – does X
-   # Critical consts    • BAR – magic value
-   ###############################################################
-   ```
-
-   Skip for formats with no comments (JSON, minified assets).
-5. **Language‑specific tests** – run `cargo test`, `go test`, `bun test`, etc., when present.
-
-──────────────── ADDENDUM: gdlint CLASS‑ORDER WARNINGS ────────────────
-
-`gdlint` 4.x enforces **class‑definitions‑order** (tool → `class_name` → `extends` → signals → enums → consts → exports → vars). If it becomes noisy:
-
-* Re‑order clauses to match the list, or
-* Suppress in file – `# gdlint:ignore = class-definitions-order`, or
-* Customise via `.gdlintrc`, or
-* Pin `gdtoolkit==4.0.1`.
-
-CI runs `gdlint` **non‑blocking**; treat warnings as advice until you’re ready to enforce them strictly.
-
-\###############################################################################
-
-# End of Codex Agent Workspace Guide
-
-\###############################################################################
+Do not claim a check passed unless it was executed successfully.
