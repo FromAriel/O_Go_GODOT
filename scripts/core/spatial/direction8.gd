@@ -17,8 +17,9 @@ enum Value {
 }
 
 # Exact geometric component of a normalized 45-degree diagonal: 1 / sqrt(2).
-# This is mathematical rather than designer tuning. Changing it would make
-# diagonal direction vectors non-unit length and should not be exposed as data.
+# This is a mathematical invariant rather than designer tuning; there is no
+# supported operating range. Changing it makes diagonal direction vectors
+# non-unit length and would create directional speed/length inconsistency.
 const DIAGONAL_COMPONENT := 0.7071067811865476
 
 
