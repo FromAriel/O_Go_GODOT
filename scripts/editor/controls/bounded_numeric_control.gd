@@ -8,9 +8,9 @@ extends VBoxContainer
 ##   LOW BOUND ----- THUMB ----- HIGH BOUND - [CURRENT]
 ##
 ## The TunablePropertySpec remains authoritative for hard/recommended bounds,
-## step size, units, descriptions, and warning text. This control only presents
-## and edits a current value. Values outside the recommended range remain legal;
-## values outside the hard range are clamped before they are emitted.
+## step size, units, descriptions, and warning text. The slider uses `step` as
+## a convenience increment; the bracketed text field accepts any legal numeric
+## value inside the hard range without quantizing it to slider steps.
 
 signal value_changed(value: float)
 
@@ -20,7 +20,8 @@ var current_value: float = 0.0
 var _low_label: Label
 var _slider: HSlider
 var _high_label: Label
-var _value_box: SpinBox
+var _value_edit: LineEdit
+var _unit_label: Label
 var _warning_label: Label
 var _details_label: Label
 var _syncing: bool = false
@@ -43,13 +44,10 @@ func configure(property_spec: TunablePropertySpec, value: float) -> void:
 
 func set_current_value(value: float, emit_change: bool = false) -> void:
     var legal_value := _coerce_to_legal(value)
-    if is_equal_approx(current_value, legal_value):
-        _sync_value_to_ui()
-        return
-
+    var changed := not is_equal_approx(current_value, legal_value)
     current_value = legal_value
     _sync_value_to_ui()
-    if emit_change:
+    if emit_change and changed:
         value_changed.emit(current_value)
 
 
@@ -101,11 +99,16 @@ func _ensure_ui() -> void:
     open_bracket.text = "["
     row.add_child(open_bracket)
 
-    _value_box = SpinBox.new()
-    _value_box.name = "CurrentValue"
-    _value_box.custom_minimum_size.x = 120.0
-    _value_box.value_changed.connect(_on_value_box_value_changed)
-    row.add_child(_value_box)
+    _value_edit = LineEdit.new()
+    _value_edit.name = "CurrentValue"
+    _value_edit.custom_minimum_size.x = 120.0
+    _value_edit.text_submitted.connect(_on_value_text_submitted)
+    _value_edit.focus_exited.connect(_on_value_focus_exited)
+    row.add_child(_value_edit)
+
+    _unit_label = Label.new()
+    _unit_label.name = "Unit"
+    row.add_child(_unit_label)
 
     var close_bracket := Label.new()
     close_bracket.name = "CloseBracket"
@@ -135,7 +138,7 @@ func _apply_spec_to_ui() -> void:
             title.text = "Value"
         _low_label.text = "—"
         _high_label.text = "—"
-        _value_box.suffix = ""
+        _unit_label.text = ""
         _warning_label.visible = false
         _details_label.visible = false
         return
@@ -147,6 +150,7 @@ func _apply_spec_to_ui() -> void:
     if spec.range == null or not spec.range.is_definition_valid():
         _low_label.text = "INVALID"
         _high_label.text = "INVALID"
+        _unit_label.text = ""
         _warning_label.text = "Invalid property range definition."
         _warning_label.visible = true
         return
@@ -157,15 +161,9 @@ func _apply_spec_to_ui() -> void:
     _slider.allow_lesser = false
     _slider.allow_greater = false
 
-    _value_box.min_value = spec.range.hard_min
-    _value_box.max_value = spec.range.hard_max
-    _value_box.step = spec.step
-    _value_box.allow_lesser = false
-    _value_box.allow_greater = false
-    _value_box.suffix = " %s" % String(spec.unit) if not String(spec.unit).is_empty() else ""
-
     _low_label.text = _format_number(spec.range.hard_min)
     _high_label.text = _format_number(spec.range.hard_max)
+    _unit_label.text = String(spec.unit)
 
     var detail_parts: Array[String] = []
     if not spec.description.strip_edges().is_empty():
@@ -179,12 +177,12 @@ func _apply_spec_to_ui() -> void:
 
 
 func _sync_value_to_ui() -> void:
-    if _slider == null or _value_box == null:
+    if _slider == null or _value_edit == null:
         return
 
     _syncing = true
     _slider.set_value_no_signal(current_value)
-    _value_box.set_value_no_signal(current_value)
+    _value_edit.text = _format_number(current_value)
     _syncing = false
     _refresh_warning()
 
@@ -193,17 +191,39 @@ func _on_slider_value_changed(value: float) -> void:
     _accept_user_value(value)
 
 
-func _on_value_box_value_changed(value: float) -> void:
-    _accept_user_value(value)
+func _on_value_text_submitted(text: String) -> void:
+    _accept_user_text(text)
+
+
+func _on_value_focus_exited() -> void:
+    if _value_edit != null:
+        _accept_user_text(_value_edit.text)
+
+
+func _accept_user_text(text: String) -> void:
+    if _syncing:
+        return
+
+    var trimmed := text.strip_edges()
+    if not trimmed.is_valid_float():
+        _value_edit.text = _format_number(current_value)
+        _warning_label.text = "⚠ Enter a valid numeric value. The previous value was kept."
+        _warning_label.visible = true
+        return
+
+    _accept_user_value(trimmed.to_float())
 
 
 func _accept_user_value(value: float) -> void:
     if _syncing:
         return
 
-    current_value = _coerce_to_legal(value)
+    var legal_value := _coerce_to_legal(value)
+    var changed := not is_equal_approx(current_value, legal_value)
+    current_value = legal_value
     _sync_value_to_ui()
-    value_changed.emit(current_value)
+    if changed:
+        value_changed.emit(current_value)
 
 
 func _coerce_to_legal(value: float) -> float:
