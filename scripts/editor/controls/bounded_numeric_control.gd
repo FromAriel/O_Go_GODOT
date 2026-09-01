@@ -14,6 +14,11 @@ extends VBoxContainer
 
 signal value_changed(value: float)
 
+# UI display precision only. Twelve decimal places preserve deliberately tiny
+# legal bounds (for example 0.000001) while avoiding unreadable float noise.
+# Runtime values are never rounded to this precision.
+const DISPLAY_DECIMAL_PRECISION := 12
+
 var spec: TunablePropertySpec
 var current_value: float = 0.0
 
@@ -44,7 +49,7 @@ func configure(property_spec: TunablePropertySpec, value: float) -> void:
 
 func set_current_value(value: float, emit_change: bool = false) -> void:
     var legal_value := _coerce_to_legal(value)
-    var changed := not is_equal_approx(current_value, legal_value)
+    var changed := current_value != legal_value
     current_value = legal_value
     _sync_value_to_ui()
     if emit_change and changed:
@@ -155,11 +160,16 @@ func _apply_spec_to_ui() -> void:
         _warning_label.visible = true
         return
 
+    # Range property changes can emit value_changed while the control is being
+    # configured. Suppress those setup-time signals so they cannot overwrite
+    # the caller-provided current value before the first UI sync.
+    _syncing = true
     _slider.min_value = spec.range.hard_min
     _slider.max_value = spec.range.hard_max
     _slider.step = spec.step
     _slider.allow_lesser = false
     _slider.allow_greater = false
+    _syncing = false
 
     _low_label.text = _format_number(spec.range.hard_min)
     _high_label.text = _format_number(spec.range.hard_max)
@@ -219,7 +229,7 @@ func _accept_user_value(value: float) -> void:
         return
 
     var legal_value := _coerce_to_legal(value)
-    var changed := not is_equal_approx(current_value, legal_value)
+    var changed := current_value != legal_value
     current_value = legal_value
     _sync_value_to_ui()
     if changed:
@@ -252,6 +262,6 @@ func _refresh_warning() -> void:
 
 
 func _format_number(value: float) -> String:
-    if is_equal_approx(value, roundf(value)):
+    if value == roundf(value):
         return str(int(roundf(value)))
-    return str(value)
+    return String.num(value, DISPLAY_DECIMAL_PRECISION)
