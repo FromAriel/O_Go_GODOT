@@ -1,0 +1,22 @@
+# Godot generated/imported state
+.godot/
+.import/
+
+# Mono/C# generated state
+.mono/
+
+# Local editor/IDE state
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local logs and temporary output
+*.log
+*.tmp
+
+# Build/export output
+build/
+dist/
+export/
+exports/

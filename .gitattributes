@@ -1,0 +1,16 @@
+* text=auto eol=lf
+
+# Common binary game assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.wav binary
+*.ogg binary
+*.mp3 binary
+*.ttf binary
+*.otf binary
+*.glb binary
+*.gltf binary
+*.blend binary
