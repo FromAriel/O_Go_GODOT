@@ -96,11 +96,21 @@ func _ensure_ui() -> void:
     separator.text = "-"
     row.add_child(separator)
 
+    var open_bracket := Label.new()
+    open_bracket.name = "OpenBracket"
+    open_bracket.text = "["
+    row.add_child(open_bracket)
+
     _value_box = SpinBox.new()
     _value_box.name = "CurrentValue"
     _value_box.custom_minimum_size.x = 120.0
     _value_box.value_changed.connect(_on_value_box_value_changed)
     row.add_child(_value_box)
+
+    var close_bracket := Label.new()
+    close_bracket.name = "CloseBracket"
+    close_bracket.text = "]"
+    row.add_child(close_bracket)
 
     _warning_label = Label.new()
     _warning_label.name = "Warning"
