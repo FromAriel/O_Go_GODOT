@@ -21,9 +21,9 @@ Do not claim validation that was not actually run.
 
 # Current Status
 
-**Current phase:** P5 — Content registry and reference resolution
+**Current phase:** P6 — Map data model
 
-**Current next action:** Begin P5.1–P5.5 by defining a focused content registry that registers stable content definitions, resolves IDs, detects duplicates/missing references, and remains separate from runtime object instantiation.
+**Current next action:** Begin P6.1–P6.6 by defining map identity/dimensions/environment, semantic layers, placed object/actor/trigger/spawn data, extension metadata, and round-trip serialization without introducing rendering before P7.
 
 ---
 
@@ -83,11 +83,11 @@ Do not claim validation that was not actually run.
 
 ## P5 — Content registry and reference resolution
 
-- [ ] P5.1 Register stable content definitions.
-- [ ] P5.2 Resolve stable IDs.
-- [ ] P5.3 Detect duplicate IDs.
-- [ ] P5.4 Diagnose missing references.
-- [ ] P5.5 Keep content lookup separate from object instantiation.
+- [x] P5.1 Register stable content definitions.
+- [x] P5.2 Resolve stable IDs.
+- [x] P5.3 Detect duplicate IDs.
+- [x] P5.4 Diagnose missing references.
+- [x] P5.5 Keep content lookup separate from object instantiation.
 
 ## P6 — Map data model
 
@@ -480,3 +480,39 @@ Do not claim validation that was not actually run.
 
 **Next logical task:**
 - Begin P5 content registry and reference resolution.
+
+## 2026-09-01 — P5 content registry and reference resolution
+
+**Phase/task IDs:** P5.1–P5.5
+
+**Changed:**
+- Added data-only `ContentDefinition` descriptors carrying stable ID, content kind, optional source path, and extension metadata.
+- Added `ContentLookupResult` so lookup results and structured diagnostics travel together.
+- Added `ContentRegistry` for stable-ID registration/resolution, duplicate detection, missing-reference diagnostics, expected-kind validation, and deterministic descriptor listing for future search/reference pickers.
+- Integrated existing `AssetReference` resolution so its stable ID remains authoritative and `path_hint` remains non-authoritative context only.
+- Added an integration test proving the demo project's `starting_map` and `starting_spawn` resolve through the registry with expected kinds.
+- Exercised representative map, spawn, prop, actor, dialogue, and asset descriptors without defining or instantiating those future domain objects early.
+- Kept scene/resource loading and gameplay-object construction entirely outside the registry.
+
+**Validation actually run:**
+- GitHub Actions / Godot 4.7.2 official standard Linux x86_64.
+- Project import — PASS.
+- Project parse/check-only — PASS.
+- P1 shared primitive regression suite — PASS.
+- P2 tunable-property metadata regression suite — PASS.
+- P2 bounded numeric control regression suite — PASS.
+- P4 project-manifest suite — PASS.
+- P4 repository project-bootstrap suite — PASS.
+- `tests/content/test_content_registry.gd` — PASS.
+
+**Result:**
+- P5 complete.
+- Stable project content can now be registered and addressed uniformly by ID with focused duplicate/missing/kind diagnostics.
+- Registry ownership remains lookup-only; future loaders/factories consume descriptors rather than being embedded into the registry.
+
+**New TODOs:**
+- P6 map loading should register real `MapData` descriptors with this registry once the map schema exists.
+- Future project content-catalog discovery can feed descriptors into `ContentRegistry`; no catalog/asset-pack/mod loader is required for the MVP registry itself.
+
+**Next logical task:**
+- Begin P6 map data model and round-trip serialization. Rendering remains P7.
