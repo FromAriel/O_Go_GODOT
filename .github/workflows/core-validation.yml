@@ -40,3 +40,6 @@ jobs:
 
       - name: Test bounded numeric control
         run: ${{ runner.temp }}/o-go-tools/bin/godot --headless --path . --script res://tests/editor/test_bounded_numeric_control.gd
+
+      - name: Test project manifest
+        run: ${{ runner.temp }}/o-go-tools/bin/godot --headless --path . --script res://tests/project/test_project_manifest.gd
