@@ -21,9 +21,9 @@ Do not claim validation that was not actually run.
 
 # Current Status
 
-**Current phase:** P4 — Project model
+**Current phase:** P5 — Content registry and reference resolution
 
-**Current next action:** Complete P4.6–P4.7 by auditing tile-size-sensitive code for hidden 32px assumptions and loading a minimal repository-backed game project through `ProjectManifestLoader`, without introducing map runtime or content-registry responsibilities early.
+**Current next action:** Begin P5.1–P5.5 by defining a focused content registry that registers stable content definitions, resolves IDs, detects duplicates/missing references, and remains separate from runtime object instantiation.
 
 ---
 
@@ -78,8 +78,8 @@ Do not claim validation that was not actually run.
 - [x] P4.3 Support 16/32/64 base tile sizes.
 - [x] P4.4 Define starting map/spawn configuration.
 - [x] P4.5 Add project validation diagnostics.
-- [ ] P4.6 Ensure downstream code does not hardcode 32px tiles.
-- [ ] P4.7 Load a minimal game project through project data.
+- [x] P4.6 Ensure downstream code does not hardcode 32px tiles.
+- [x] P4.7 Load a minimal game project through project data.
 
 ## P5 — Content registry and reference resolution
 
@@ -447,3 +447,36 @@ Do not claim validation that was not actually run.
 
 **Next logical task:**
 - Complete P4.6–P4.7, then move to P5 content registry and reference resolution.
+
+## 2026-09-01 — P4 repository project bootstrap
+
+**Phase/task IDs:** P4.6–P4.7
+
+**Changed:**
+- Added `projects/demo/project.json` as the first checked-in game-project manifest.
+- Loaded the demo through `ProjectManifestLoader.load_file()` rather than bypassing the project-data path.
+- Audited the current production tile-scale surface for hidden 32px assumptions; the only intentional 32 value is the project default/supported-size declaration, while spatial conversion requires caller-supplied cell size.
+- Added `tests/project/test_project_bootstrap.gd` to prove the repository manifest loads and that spatial conversion follows 16/32/64 project tile scales.
+- Extended Core Validation with the repository project-bootstrap test.
+- Kept starting-map/spawn existence checks out of P4; P5 content resolution owns that responsibility.
+
+**Validation actually run:**
+- GitHub Actions / Godot 4.7.2 official standard Linux x86_64.
+- Project import — PASS.
+- Project parse/check-only — PASS.
+- P1 shared primitive regression suite — PASS.
+- P2 tunable-property metadata regression suite — PASS.
+- P2 bounded numeric control regression suite — PASS.
+- P4 project-manifest suite — PASS.
+- `tests/project/test_project_bootstrap.gd` — PASS, including 16/32/64 scale-derived spatial conversion.
+
+**Result:**
+- P4 complete.
+- The engine now has a real repository-backed project loaded through the same public data path future code/editor/agent tooling will use.
+- No current downstream production subsystem quietly assumes 32px tiles.
+
+**New TODOs:**
+- P5 should resolve `map.meadow` and `spawn.meadow.entry` against actual registered content once those definitions exist; P4 deliberately validates namespace/shape only.
+
+**Next logical task:**
+- Begin P5 content registry and reference resolution.
