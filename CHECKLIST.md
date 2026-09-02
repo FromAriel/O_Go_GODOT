@@ -23,7 +23,7 @@ Do not claim validation that was not actually run.
 
 **Current phase:** P4 — Project model
 
-**Current next action:** Begin P4.1–P4.5 by defining a versioned project manifest and focused loader/validation path, including 16/32/64 tile sizes and named starting map/spawn data, before wiring any downstream map runtime.
+**Current next action:** Complete P4.6–P4.7 by auditing tile-size-sensitive code for hidden 32px assumptions and loading a minimal repository-backed game project through `ProjectManifestLoader`, without introducing map runtime or content-registry responsibilities early.
 
 ---
 
@@ -73,11 +73,11 @@ Do not claim validation that was not actually run.
 
 ## P4 — Project model
 
-- [ ] P4.1 Define project manifest schema.
-- [ ] P4.2 Implement project loader.
-- [ ] P4.3 Support 16/32/64 base tile sizes.
-- [ ] P4.4 Define starting map/spawn configuration.
-- [ ] P4.5 Add project validation diagnostics.
+- [x] P4.1 Define project manifest schema.
+- [x] P4.2 Implement project loader.
+- [x] P4.3 Support 16/32/64 base tile sizes.
+- [x] P4.4 Define starting map/spawn configuration.
+- [x] P4.5 Add project validation diagnostics.
 - [ ] P4.6 Ensure downstream code does not hardcode 32px tiles.
 - [ ] P4.7 Load a minimal game project through project data.
 
@@ -413,3 +413,37 @@ Do not claim validation that was not actually run.
 
 **Next logical task:**
 - Begin P4 project manifest schema, loader, tile-size configuration, starting map/spawn references, and validation diagnostics.
+
+## 2026-09-01 — P4 project manifest foundation
+
+**Phase/task IDs:** P4.1–P4.5
+
+**Changed:**
+- Added data-only `ProjectManifest` with explicit schema version, project identity/version, project tile size, starting map/spawn stable IDs, and an extension metadata dictionary.
+- Added `ProjectLoadResult` to carry manifest data and structured diagnostics together.
+- Added `ProjectManifestValidator` for schema decoding, required-field/type validation, stable-ID namespace checks, 16/32/64 tile-size support, warnings for unknown fields, and semantic validation.
+- Added `ProjectManifestLoader` as the isolated file/text + JSON boundary; it delegates schema/semantic rules rather than owning them.
+- Kept content existence/reference resolution explicitly out of P4 for the P5 registry.
+- Added focused tests covering valid manifests, all three supported tile sizes, unsupported sizes, schema versions, namespaces, missing/type-invalid fields, unknown-field warnings, extension preservation, malformed JSON, wrong root type, file loading, and missing files.
+- Extended Core Validation with the project-manifest test.
+
+**Validation actually run:**
+- GitHub Actions / Godot 4.7.2 official standard Linux x86_64.
+- Project import — PASS.
+- Project parse/check-only — PASS.
+- P1 shared primitive regression suite — PASS.
+- P2 tunable-property metadata regression suite — PASS.
+- P2 bounded numeric control regression suite — PASS.
+- `tests/project/test_project_manifest.gd` — PASS.
+
+**Result:**
+- P4.1–P4.5 complete.
+- Project data, validation, file loading, and future content resolution remain separate concerns.
+- P4.6–P4.7 intentionally remain open until an actual repository project manifest is loaded and tile-size-sensitive code is audited against that data.
+
+**New TODOs:**
+- P4.6: audit production code for hidden 32px assumptions as the first project-backed data is introduced.
+- P4.7: add a minimal repository-backed project manifest and prove it loads through the same public loader path used by future editor/agent tooling.
+
+**Next logical task:**
+- Complete P4.6–P4.7, then move to P5 content registry and reference resolution.
