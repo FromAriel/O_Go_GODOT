@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "id": "project.demo",
+  "title": "O Go GODOT Demo",
+  "version": "0.1.0",
+  "world": {
+    "tile_size": 32,
+    "starting_map": "map.meadow",
+    "starting_spawn": "spawn.meadow.entry"
+  },
+  "extensions": {}
+}
