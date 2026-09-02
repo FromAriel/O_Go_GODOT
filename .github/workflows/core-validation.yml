@@ -43,3 +43,6 @@ jobs:
 
       - name: Test project manifest
         run: ${{ runner.temp }}/o-go-tools/bin/godot --headless --path . --script res://tests/project/test_project_manifest.gd
+
+      - name: Test project bootstrap
+        run: ${{ runner.temp }}/o-go-tools/bin/godot --headless --path . --script res://tests/project/test_project_bootstrap.gd
